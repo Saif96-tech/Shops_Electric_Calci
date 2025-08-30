@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Electricity Bill Calculator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        label::after {
+            content: " *";
+            color: #e74c3c;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        input:invalid {
+            border-color: #e74c3c;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .shop-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid #3498db;
+            position: relative;
+        }
+        
+        .shop-card:nth-child(2) {
+            border-left-color: #2ecc71;
+        }
+        
+        .shop-card:nth-child(3) {
+            border-left-color: #e74c3c;
+        }
+        
+        .shop-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .optional-shop {
+            opacity: 0.8;
+        }
+        
+        .optional-shop .shop-title::after {
+            content: " (Optional)";
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+        
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 250px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        #shareBtn {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        }
+        
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .result-header {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            text-align: center;
+        }
+        
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .result-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .result-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+        
+        .result-label {
+            color: #7f8c8d;
+            font-weight: 600;
+        }
+        
+        .summary {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        
+        .summary-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+        
+        .validation {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 6px;
+        }
+        
+        .validation-error {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .validation-title {
+            color: #155724;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .validation-error .validation-title {
+            color: #721c24;
+        }
+        
+        .negative-difference {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .shop-summary {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .shop-summary-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        @media (max-width: 768px) {
+            .input-grid, .shop-grid, .result-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Shop Electricity Bill Calculator</h1>
+            <p class="description">Calculate electricity bills for three shops based on meter readings, unit charges, and load distribution</p>
+        </header>
+        
+        <div class="card">
+            <h2 class="card-title">Bill Information</h2>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label for="totalAmount">Total Bill Amount (₹)</label>
+                    <input type="number" id="totalAmount" placeholder="Enter total bill amount" required value="0">
+                    <div class="error-message">This field is required</div>
+                </div>
+                <div class="input-group">
+                    <label for="totalUnits">Total Units (kWh)</label>
+                    <input type="number" id="totalUnits" placeholder="Enter total units consumed" required value="0">
+                    <div class="error-message">This field is required</div>
+                </div>
+                <div class="input-group">
+                    <label for="perUnitCharge">Per Unit Charge (₹)</label>
+                    <input type="number" id="perUnitCharge" placeholder="Enter charge per unit" required step="0.01" value="0">
+                    <div class="error-message">This field is required</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">Shop Meter Readings</h2>
+            <div class="shop-grid">
+                <div class="shop-card">
+                    <h3 class="shop-title">Shop 1</h3>
+                    <div class="input-group">
+                        <label for="shop1Last">Last Meter Reading</label>
+                        <input type="number" id="shop1Last" placeholder="Previous reading" required value="0">
+                        <div class="error-message">This field is required</div>
+                    </div>
+                    <div class="input-group">
+                        <label for="shop1Current">Current Meter Reading</label>
+                        <input type="number" id="shop1Current" placeholder="Current reading" required value="0">
+                        <div class="error-message">This field is required</div>
+                    </div>
+                </div>
+                
+                <div class="shop-card">
+                    <h3 class="shop-title">Shop 2</h3>
+                    <div class="input-group">
+                        <label for="shop2Last">Last Meter Reading</label>
+                        <input type="number" id="shop2Last" placeholder="Previous reading" required value="0">
+                        <div class="error-message">This field is required</div>
+                    </div>
+                    <div class="input-group">
+                        <label for="shop2Current">Current Meter Reading</label>
+                        <input type="number" id="shop2Current" placeholder="Current reading" required value="0">
+                        <div class="error-message">This field is required</div>
+                    </div>
+                </div>
+                
+                <div class="shop-card optional-shop">
+                    <h3 class="shop-title">Shop 3</h3>
+                    <div class="input-group">
+                        <label for="shop3Last">Last Meter Reading</label>
+                        <input type="number" id="shop3Last" placeholder="Previous reading" value="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="shop3Current">Current Meter Reading</label>
+                        <input type=" number" id="shop3Current" placeholder="Current reading" value="0">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button id="calculateBtn">Calculate Bills</button>
+            <button id="shareBtn">Share as PDF</button>
+        </div>
+        
+        <div class="results" id="resultsSection">
+            <div class="result-card">
+                <h2 class="result-header">Calculation Results</h2>
+                <div class="result-grid">
+                    <div class="result-item">
+                        <div class="result-label">Total Load Charges</div>
+                        <div class="result-value" id="totalLoad">₹0.00</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Total Units Consumed</div>
+                        <div class="result-value" id="totalCalculatedUnits">0 kWh</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="result-label">Difference in Readings</div>
+                        <div class="result-value" id="readingDifference">0 kWh</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="result-card">
+                <h2 class="result-header">Shop-wise Breakdown</h2>
+                <div class="shop-grid">
+                    <div class="shop-card">
+                        <h3 class="shop-title">Shop 1</h3>
+                        <div class="result-item">
+                            <div class="result-label">Units Consumed</div>
+                            <div class="result-value" id="shop1Units">0 kWh</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Unit Charges</div>
+                            <div class="result-value" id="shop1UnitCharges">₹0.00</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Load Charges</div>
+                            <div class="result-value" id="shop1Load">₹0.00</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Total Amount</div>
+                            <div class="result-value" id="shop1Total">₹0.00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="shop-card">
+                        <h3 class="shop-title">Shop 2</h3>
+                        <div class="result-item">
+                            <div class="result-label">Units Consumed</div>
+                            <div class="result-value" id="shop2Units">0 kWh</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Unit Charges</div>
+                            <div class="result-value" id="shop2UnitCharges">₹0.00</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Load Charges</div>
+                            <div class="result-value" id="shop2Load">₹0.00</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Total Amount</div>
+                            <div class="result-value" id="shop2Total">₹0.00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="shop-card">
+                        <h3 class="shop-title">Shop 3</h3>
+                        <div class="result-item">
+                            <div class="result-label">Units Consumed</div>
+                            <div class="result-value" id="shop3Units">0 kWh</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Unit Charges</div>
+                            <div class="result-value" id="shop3UnitCharges">₹0.00</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Load Charges</div>
+                            <div class="result-value" id="shop3Load">₹0.00</div>
+                        </div>
+                        <div class="result-item">
+                            <div class="result-label">Total Amount</div>
+                            <div class="result-value" id="shop3Total">₹0.00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="summary">
+                <h3 class="summary-title">Bill Summary</h3>
+                <div class="summary-item">
+                    <span>Total Bill Amount:</span>
+                    <span id="summaryTotal">₹0.00</span>
+                </div>
+                <div class="summary-item">
+                    <span>Total Unit Charges:</span>
+                    <span id="summaryUnitCharges">₹0.00</span>
+                </div>
+                <div class="summary-item">
+                    <span>Total Load Charges:</span>
+                    <span id="summaryLoad">₹0.00</span>
+                </div>
+                <div class="summary-item">
+                    <span>Difference Amount:</span>
+                    <span id="summaryExtra">₹0.00</span>
+                </div>
+                
+                <div class="shop-summary">
+                    <h4 class="shop-summary-title">Shop-wise Totals</h4>
+                    <div class="summary-item">
+                        <span>Shop 1 Total:</span>
+                        <span id="summaryShop1">₹0.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Shop 2 Total:</span>
+                        <span id="summaryShop2">₹0.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Shop 3 Total:</span>
+                        <span id="summaryShop3">₹0.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>All Shops Combined:</span>
+                        <span id="summaryShops">₹0.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Difference Amount:</span>
+                        <span id="summaryDifferenceAmount">₹0.00</span>
+                    </div>
+                    <div class="summary-item" style="font-weight: bold; border-top: 2px solid rgba(255,255,255,0.5);">
+                        <span>Grand Total:</span>
+                        <span id="summaryGrandTotal">₹0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="validation" id="validationSection">
+                <div class="validation-title">Validation Check</div>
+                <p id="validationDetails">Calculation validation will appear here.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calculateBtn = document.getElementById('calculateBtn');
+            const shareBtn = document.getElementById('shareBtn');
+            const resultsSection = document.getElementById('resultsSection');
+            const validationSection = document.getElementById('validationSection');
+            const inputs = document.querySelectorAll('input[required]');
+            
+            // Add validation to required inputs
+            inputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    validateInput(this);
+                });
+            });
+            
+            function validateInput(input) {
+                const errorMessage = input.parentElement.querySelector('.error-message');
+                if (!input.value) {
+                    errorMessage.style.display = 'block';
+                    input.style.borderColor = '#e74c3c';
+                    return false;
+                } else {
+                    errorMessage.style.display = 'none';
+                    input.style.borderColor = '#ddd';
+                    return true;
+                }
+            }
+            
+            function validateForm() {
+                let isValid = true;
+                inputs.forEach(input => {
+                    if (!validateInput(input)) {
+                        isValid = false;
+                    }
+                });
+                
+                // Check if at least two shops have readings
+                const shop1Last = parseFloat(document.getElementById('shop1Last').value) || 0;
+                const shop1Current = parseFloat(document.getElementById('shop1Current').value) || 0;
+                const shop2Last = parseFloat(document.getElementById('shop2Last').value) || 0;
+                const shop2Current = parseFloat(document.getElementById('shop2Current').value) || 0;
+                const shop3Last = parseFloat(document.getElementById('shop3Last').value) || 0;
+                const shop3Current = parseFloat(document.getElementById('shop3Current').value) || 0;
+                
+                const shop1Valid = shop1Current >= shop1Last;
+                const shop2Valid = shop2Current >= shop2Last;
+                const shop3Valid = shop3Current >= shop3Last;
+                
+                const validShops = [shop1Valid, shop2Valid, shop3Valid].filter(Boolean).length;
+                
+                if (validShops < 2) {
+                    alert('Please provide valid meter readings for at least two shops.');
+                    isValid = false;
+                }
+                
+                return isValid;
+            }
+            
+            calculateBtn.addEventListener('click', function() {
+                if (!validateForm()) return;
+                
+                // Get main bill inputs
+                const totalAmount = parseFloat(document.getElementById('totalAmount').value) || 0;
+                const totalUnits = parseFloat(document.getElementById('totalUnits').value) || 0;
+                const perUnitCharge = parseFloat(document.getElementById('perUnitCharge').value) || 0;
+                
+                // Get shop readings
+                const shop1Last = parseFloat(document.getElementById('shop1Last').value) || 0;
+                const shop1Current = parseFloat(document.getElementById('shop1Current').value) || 0;
+                const shop2Last = parseFloat(document.getElementById('shop2Last').value) || 0;
+                const shop2Current = parseFloat(document.getElementById('shop2Current').value) || 0;
+                const shop3Last = parseFloat(document.getElementById('shop3Last').value) || 0;
+                const shop3Current = parseFloat(document.getElementById('shop3Current').value) || 0;
+                
+                // Calculate shop units
+                const shop1Units = Math.max(0, shop1Current - shop1Last);
+                const shop2Units = Math.max(0, shop2Current - shop2Last);
+                const shop3Units = Math.max(0, shop3Current - shop3Last);
+                
+                // Calculate total units from shops
+                const totalCalculatedUnits = shop1Units + shop2Units + shop3Units;
+                
+                // Calculate reading difference
+                const readingDifference = totalCalculatedUnits - totalUnits;
+                
+                // Calculate load charges
+                const totalUnitCharges = totalUnits * perUnitCharge;
+                const totalLoadCharges = totalAmount - totalUnitCharges;
+                
+                // Calculate percentage of units for each shop
+                const shop1Percent = totalCalculatedUnits > 0 ? shop1Units / totalCalculatedUnits : 0;
+                const shop2Percent = totalCalculatedUnits > 0 ? shop2Units / totalCalculatedUnits : 0;
+                const shop3Percent = totalCalculatedUnits > 0 ? shop3Units / totalCalculatedUnits : 0;
+                
+                // Calculate unit charges for each shop
+                const shop1UnitCharges = shop1Units * perUnitCharge;
+                const shop2UnitCharges = shop2Units * perUnitCharge;
+                const shop3UnitCharges = shop3Units * perUnitCharge;
+                
+                // Calculate load charges for each shop (proportional to unit usage)
+                const shop1LoadCharges = shop1Percent * totalLoadCharges;
+                const shop2LoadCharges = shop2Percent * totalLoadCharges;
+                const shop3LoadCharges = shop3Percent * totalLoadCharges;
+                
+                // Calculate difference amount
+                const differenceAmount = Math.abs(readingDifference) * perUnitCharge;
+                
+                // Calculate total for each shop
+                const shop1Total = shop1UnitCharges + shop1LoadCharges;
+                const shop2Total = shop2UnitCharges + shop2LoadCharges;
+                const shop3Total = shop3UnitCharges + shop3LoadCharges;
+                
+                // Calculate sum of all shop totals
+                const sumShopTotals = shop1Total + shop2Total + shop3Total;
+                
+                // Calculate grand total (shops + difference amount)
+                const grandTotal = sumShopTotals + (readingDifference > 0 ? differenceAmount : -differenceAmount);
+                
+                // Validate if grand total equals total bill amount
+                const difference = Math.abs(grandTotal - totalAmount);
+                let validationDetails = "";
+                
+                if (difference < 0.01) { // Account for floating point precision
+                    validationDetails = `Validation Successful: Grand Total (₹${grandTotal.toFixed(2)}) equals Total Bill Amount (₹${totalAmount.toFixed(2)})`;
+                    validationSection.className = "validation";
+                } else {
+                    validationDetails = `Calculation Error: Grand Total (₹${grandTotal.toFixed(2)}) does not match Total Bill Amount (₹${totalAmount.toFixed(2)})`;
+                    validationSection.className = "validation validation-error";
+                }
+                
+                // Update UI with results
+                document.getElementById('totalLoad').textContent = `₹${totalLoadCharges.toFixed(2)}`;
+                document.getElementById('totalCalculatedUnits').textContent = `${totalCalculatedUnits.toFixed(2)} kWh`;
+                
+                // Format reading difference with color for negative values
+                const readingDifferenceElem = document.getElementById('readingDifference');
+                readingDifferenceElem.textContent = `${readingDifference.toFixed(2)} kWh`;
+                if (readingDifference < 0) {
+                    readingDifferenceElem.classList.add('negative-difference');
+                } else {
+                    readingDifferenceElem.classList.remove('negative-difference');
+                }
+                
+                // Shop 1
+                document.getElementById('shop1Units').textContent = `${shop1Units.toFixed(2)} kWh`;
+                document.getElementById('shop1UnitCharges').textContent = `₹${shop1UnitCharges.toFixed(2)}`;
+                document.getElementById('shop1Load').textContent = `₹${shop1LoadCharges.toFixed(2)}`;
+                document.getElementById('shop1Total').textContent = `₹${shop1Total.toFixed(2)}`;
+                
+                // Shop 2
+                document.getElementById('shop2Units').textContent = `${shop2Units.toFixed(2)} kWh`;
+                document.getElementById('shop2UnitCharges').textContent = `₹${shop2UnitCharges.toFixed(2)}`;
+                document.getElementById('shop2Load').textContent = `₹${shop2LoadCharges.toFixed(2)}`;
+                document.getElementById('shop2Total').textContent = `₹${shop2Total.toFixed(2)}`;
+                
+                // Shop 3
+                document.getElementById('shop3Units').textContent = `${shop3Units.toFixed(2)} kWh`;
+                document.getElementById('shop3UnitCharges').textContent = `₹${shop3UnitCharges.toFixed(2)}`;
+                document.getElementById('shop3Load').textContent = `₹${shop3LoadCharges.toFixed(2)}`;
+                document.getElementById('shop3Total').textContent = `₹${shop3Total.toFixed(2)}`;
+                
+                // Update summary
+                document.getElementById('summaryTotal').textContent = `₹${totalAmount.toFixed(2)}`;
+                document.getElementById('summaryUnitCharges').textContent = `₹${totalUnitCharges.toFixed(2)}`;
+                document.getElementById('summaryLoad').textContent = `₹${totalLoadCharges.toFixed(2)}`;
+                document.getElementById('summaryExtra').textContent = `₹${differenceAmount.toFixed(2)}`;
+                
+                // Update shop totals in summary
+                document.getElementById('summaryShop1').textContent = `₹${shop1Total.toFixed(2)}`;
+                document.getElementById('summaryShop2').textContent = `₹${shop2Total.toFixed(2)}`;
+                document.getElementById('summaryShop3').textContent = `₹${shop3Total.toFixed(2)}`;
+                document.getElementById('summaryShops').textContent = `₹${sumShopTotals.toFixed(2)}`;
+                document.getElementById('summaryDifferenceAmount').textContent = `₹${differenceAmount.toFixed(2)}`;
+                document.getElementById('summaryGrandTotal').textContent = `₹${grandTotal.toFixed(2)}`;
+                
+                // Update validation details
+                document.getElementById('validationDetails').textContent = validationDetails;
+                
+                // Show results section
+                resultsSection.style.display = 'block';
+                
+                // Scroll to results
+                resultsSection.scrollIntoView({ behavior: 'smooth' });
+            });
+            
+            shareBtn.addEventListener('click', function() {
+                if (resultsSection.style.display !== 'block') {
+                    alert('Please calculate the bill first before sharing.');
+                    return;
+                }
+                
+                // Create PDF using html2canvas and jsPDF
+                html2canvas(resultsSection).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    const imgWidth = 210; // A4 width in mm
+                    const pageHeight = 297; // A4 height in mm
+                    const imgHeight = canvas.height * imgWidth / canvas.width;
+                    let heightLeft = imgHeight;
+                    let position = 0;
+                    
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                    
+                    // Add more pages if needed
+                    while (heightLeft >= 0) {
+                        position = heightLeft - imgHeight;
+                        pdf.addPage();
+                        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                        heightLeft -= pageHeight;
+                    }
+                    
+                    // Save the PDF
+                    pdf.save('Electricity_Bill_Calculation.pdf');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
