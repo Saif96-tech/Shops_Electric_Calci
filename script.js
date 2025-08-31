@@ -58,6 +58,9 @@ document.addEventListener('DOMContentLoaded', function() {
     calculateBtn.addEventListener('click', function() {
         if (!validateForm()) return;
         
+        // Show results section first
+        resultsSection.style.display = 'block';
+        
         // Get main bill inputs
         const totalAmount = parseFloat(document.getElementById('totalAmount').value) || 0;
         const totalUnits = parseFloat(document.getElementById('totalUnits').value) || 0;
@@ -80,16 +83,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const totalCalculatedUnits = shop1Units + shop2Units + shop3Units;
         
         // Calculate reading difference
-        const readingDifference = totalCalculatedUnits - totalUnits;
+        const readingDifference = totalUnits -totalCalculatedUnits;
         
         // Calculate load charges
         const totalUnitCharges = totalUnits * perUnitCharge;
         const totalLoadCharges = totalAmount - totalUnitCharges;
         
         // Calculate percentage of units for each shop
-        const shop1Percent = totalCalculatedUnits > 0 ? shop1Units / totalCalculatedUnits : 0;
-        const shop2Percent = totalCalculatedUnits > 0 ? shop2Units / totalCalculatedUnits : 0;
-        const shop3Percent = totalCalculatedUnits > 0 ? shop3Units / totalCalculatedUnits : 0;
+        const shop1Percent = totalUnits > 0 ? shop1Units / totalUnits : 0;
+        const shop2Percent = totalUnits > 0 ? shop2Units / totalUnits : 0;
+        const shop3Percent = totalUnits > 0 ? shop3Units / totalUnits : 0;
         
         // Calculate unit charges for each shop
         const shop1UnitCharges = shop1Units * perUnitCharge;
@@ -102,8 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const shop3LoadCharges = shop3Percent * totalLoadCharges;
         
         // Calculate difference amount
-        const differenceAmount = Math.abs(readingDifference) * perUnitCharge;
-        
+        const differenceAmount = Math.abs(readingDifference) * perUnitCharge + (readingDifference / totalUnits) * totalLoadCharges;
         // Calculate total for each shop
         const shop1Total = shop1UnitCharges + shop1LoadCharges;
         const shop2Total = shop2UnitCharges + shop2LoadCharges;
@@ -113,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const sumShopTotals = shop1Total + shop2Total + shop3Total;
         
         // Calculate grand total (shops + difference amount)
-        const grandTotal = sumShopTotals + (readingDifference > 0 ? differenceAmount : -differenceAmount);
+        const grandTotal = sumShopTotals + (readingDifference > 0 ? differenceAmount : differenceAmount);
         
         // Validate if grand total equals total bill amount
         const difference = Math.abs(grandTotal - totalAmount);
@@ -158,60 +160,85 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('shop3Load').textContent = `₹${shop3LoadCharges.toFixed(2)}`;
         document.getElementById('shop3Total').textContent = `₹${shop3Total.toFixed(2)}`;
         
-        // Update summary
-        document.getElementById('summaryTotal').textContent = `₹${totalAmount.toFixed(2)}`;
-        document.getElementById('summaryUnitCharges').textContent = `₹${totalUnitCharges.toFixed(2)}`;
+        // Update bill header details
+        const currentDate = new Date();
+        const dateStr = currentDate.toLocaleDateString('en-IN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        document.getElementById('billDate').textContent = dateStr;
+        document.getElementById('summaryUnits').textContent = `${totalUnits.toFixed(0)} kWh`;
+        document.getElementById('summaryAmount').textContent = `₹${totalAmount.toFixed(2)}`;
         document.getElementById('summaryLoad').textContent = `₹${totalLoadCharges.toFixed(2)}`;
-        document.getElementById('summaryExtra').textContent = `₹${differenceAmount.toFixed(2)}`;
-        
-        // Update shop totals in summary
-        document.getElementById('summaryShop1').textContent = `₹${shop1Total.toFixed(2)}`;
-        document.getElementById('summaryShop2').textContent = `₹${shop2Total.toFixed(2)}`;
-        document.getElementById('summaryShop3').textContent = `₹${shop3Total.toFixed(2)}`;
-        document.getElementById('summaryShops').textContent = `₹${sumShopTotals.toFixed(2)}`;
-        document.getElementById('summaryDifferenceAmount').textContent = `₹${differenceAmount.toFixed(2)}`;
-        document.getElementById('summaryGrandTotal').textContent = `₹${grandTotal.toFixed(2)}`;
-        
+
+        // Update Shop 1 row
+        document.getElementById('shop1LastReading').textContent = shop1Last;
+        document.getElementById('shop1CurrReading').textContent = shop1Current;
+        document.getElementById('shop1UnitsTable').textContent = shop1Units.toFixed(0);
+        document.getElementById('shop1LoadPercent').textContent = `${(shop1Percent * 100).toFixed(1)}%`;
+        document.getElementById('shop1LoadAmount').textContent = `₹${shop1LoadCharges.toFixed(2)}`;
+        document.getElementById('shop1TotalAmount').textContent = `₹${shop1Total.toFixed(2)}`;
+
+        // Update Shop 2 row
+        document.getElementById('shop2LastReading').textContent = shop2Last;
+        document.getElementById('shop2CurrReading').textContent = shop2Current;
+        document.getElementById('shop2UnitsTable').textContent = shop2Units.toFixed(0);
+        document.getElementById('shop2LoadPercent').textContent = `${(shop2Percent * 100).toFixed(1)}%`;
+        document.getElementById('shop2LoadAmount').textContent = `₹${shop2LoadCharges.toFixed(2)}`;
+        document.getElementById('shop2TotalAmount').textContent = `₹${shop2Total.toFixed(2)}`;
+
+        // Update Shop 3 row
+        document.getElementById('shop3LastReading').textContent = shop3Last;
+        document.getElementById('shop3CurrReading').textContent = shop3Current;
+        document.getElementById('shop3UnitsTable').textContent = shop3Units.toFixed(0);
+        document.getElementById('shop3LoadPercent').textContent = `${(shop3Percent * 100).toFixed(1)}%`;
+        document.getElementById('shop3LoadAmount').textContent = `₹${shop3LoadCharges.toFixed(2)}`;
+        document.getElementById('shop3TotalAmount').textContent = `₹${shop3Total.toFixed(2)}`;
+
+        // Update Difference row
+        document.getElementById('diffUnits').textContent = readingDifference.toFixed(0);
+        const diffLoadPercent = (readingDifference / totalUnits) * 100;
+        document.getElementById('diffLoadPercent').textContent = `${diffLoadPercent.toFixed(1)}%`;
+        document.getElementById('diffLoadAmount').textContent = `₹${(readingDifference / totalUnits * totalLoadCharges).toFixed(2)}`;
+        document.getElementById('diffTotalAmount').textContent = `₹${differenceAmount.toFixed(2)}`;
+
+        // Update Grand Total
+        document.getElementById('grandTotalAmount').textContent = `₹${totalAmount.toFixed(2)}`;
+
         // Update validation details
         document.getElementById('validationDetails').textContent = validationDetails;
         
-        // Show results section
+        // Show results section and share button
         resultsSection.style.display = 'block';
+        document.querySelector('.summary').style.display = 'block';
+        shareBtn.style.display = 'block';
         
         // Scroll to results
         resultsSection.scrollIntoView({ behavior: 'smooth' });
     });
     
-    shareBtn.addEventListener('click', function() {
+    shareBtn.addEventListener('click', async function() {
         if (resultsSection.style.display !== 'block') {
             alert('Please calculate the bill first before sharing.');
             return;
         }
-        
-        // Create PDF using html2canvas and jsPDF
-        html2canvas(resultsSection).then(canvas => {
+
+        // Create image using html2canvas
+        try {
+            const canvas = await html2canvas(document.querySelector('.summary'));
             const imgData = canvas.toDataURL('image/png');
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const imgWidth = 210; // A4 width in mm
-            const pageHeight = 297; // A4 height in mm
-            const imgHeight = canvas.height * imgWidth / canvas.width;
-            let heightLeft = imgHeight;
-            let position = 0;
             
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
+            // Create a temporary link element
+            const link = document.createElement('a');
+            link.download = 'electricity-bill-summary.png';
+            link.href = imgData;
             
-            // Add more pages if needed
-            while (heightLeft >= 0) {
-                position = heightLeft - imgHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-            }
-            
-            // Save the PDF
-            pdf.save('Electricity_Bill_Calculation.pdf');
-        });
+            // Trigger the download
+            link.click();
+        } catch (error) {
+            console.error('Error generating image:', error);
+            alert('Error generating image for sharing. Please try again.');
+        }
     });
 });

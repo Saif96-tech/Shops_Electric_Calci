@@ -84,7 +84,6 @@
         
         <div class="button-group">
             <button id="calculateBtn">Calculate Bills</button>
-            <button id="shareBtn">Share as PDF</button>
         </div>
         
         <div class="results" id="resultsSection">
@@ -171,52 +170,86 @@
                 </div>
             </div>
             
-            <div class="summary">
+            <div class="summary" style="display: none;">
                 <h3 class="summary-title">Bill Summary</h3>
-                <div class="summary-item">
-                    <span>Total Bill Amount:</span>
-                    <span id="summaryTotal">₹0.00</span>
-                </div>
-                <div class="summary-item">
-                    <span>Total Unit Charges:</span>
-                    <span id="summaryUnitCharges">₹0.00</span>
-                </div>
-                <div class="summary-item">
-                    <span>Total Load Charges:</span>
-                    <span id="summaryLoad">₹0.00</span>
-                </div>
-                <div class="summary-item">
-                    <span>Difference Amount:</span>
-                    <span id="summaryExtra">₹0.00</span>
-                </div>
-                
-                <div class="shop-summary">
-                    <h4 class="shop-summary-title">Shop-wise Totals</h4>
-                    <div class="summary-item">
-                        <span>Shop 1 Total:</span>
-                        <span id="summaryShop1">₹0.00</span>
+                <div class="bill-header">
+                    <div class="date-section">
+                        <span class="date-label">Date:</span>
+                        <span id="billDate"></span>
                     </div>
-                    <div class="summary-item">
-                        <span>Shop 2 Total:</span>
-                        <span id="summaryShop2">₹0.00</span>
-                    </div>
-                    <div class="summary-item">
-                        <span>Shop 3 Total:</span>
-                        <span id="summaryShop3">₹0.00</span>
-                    </div>
-                    <div class="summary-item">
-                        <span>All Shops Combined:</span>
-                        <span id="summaryShops">₹0.00</span>
-                    </div>
-                    <div class="summary-item">
-                        <span>Difference Amount:</span>
-                        <span id="summaryDifferenceAmount">₹0.00</span>
-                    </div>
-                    <div class="summary-item" style="font-weight: bold; border-top: 2px solid rgba(255,255,255,0.5);">
-                        <span>Grand Total:</span>
-                        <span id="summaryGrandTotal">₹0.00</span>
+                    <div class="summary-details">
+                        <div class="summary-item">
+                            <span class="summary-label">Total Units:</span>
+                            <span id="summaryUnits"></span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Total Amount:</span>
+                            <span id="summaryAmount"></span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Load Amount:</span>
+                            <span id="summaryLoad"></span>
+                        </div>
                     </div>
                 </div>
+                <div class="bill-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Last</th>
+                                <th>Curr</th>
+                                <th>Units</th>
+                                <th>Load %</th>
+                                <th>Load Amount</th>
+                                <th>Total Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Shop 1</td>
+                                <td id="shop1LastReading">0</td>
+                                <td id="shop1CurrReading">0</td>
+                                <td id="shop1UnitsTable">0</td>
+                                <td id="shop1LoadPercent">0%</td>
+                                <td id="shop1LoadAmount">₹0.00</td>
+                                <td id="shop1TotalAmount">₹0.00</td>
+                            </tr>
+                            <tr>
+                                <td>Shop 2</td>
+                                <td id="shop2LastReading">0</td>
+                                <td id="shop2CurrReading">0</td>
+                                <td id="shop2UnitsTable">0</td>
+                                <td id="shop2LoadPercent">0%</td>
+                                <td id="shop2LoadAmount">₹0.00</td>
+                                <td id="shop2TotalAmount">₹0.00</td>
+                            </tr>
+                            <tr>
+                                <td>Shop 3</td>
+                                <td id="shop3LastReading">0</td>
+                                <td id="shop3CurrReading">0</td>
+                                <td id="shop3UnitsTable">0</td>
+                                <td id="shop3LoadPercent">0%</td>
+                                <td id="shop3LoadAmount">₹0.00</td>
+                                <td id="shop3TotalAmount">₹0.00</td>
+                            </tr>
+                            <tr class="difference-row">
+                                <td>Difference Amount</td>
+                                <td colspan="3" id="diffUnits">0</td>
+                                <td id="diffLoadPercent">0%</td>
+                                <td id="diffLoadAmount">₹0.00</td>
+                                <td id="diffTotalAmount">₹0.00</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="6" style="text-align: right;"><strong>Grand Total:</strong></td>
+                                <td id="grandTotalAmount">₹0.00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <button id="shareBtn" style="display: none;">Share Bill</button>
             </div>
 
             <div class="validation" id="validationSection">
